@@ -68,10 +68,14 @@ resource "aws_route_table_association" "public_assoc" {
   route_table_id = aws_route_table.route_table.id
 }
 
-output "subnetid" {
+output "vpc_id" {
+  value = aws_vpc.vpc_jrlb_jvavm.id
+}
+
+output "public_subnetid" {
   value = aws_subnet.public_subnet.id
 }
 
-output "vpc_id" {
-  value = aws_vpc.vpc_jrlb_jvavm.id
+output "private_subnet1_id{
+  value - aws_subnet.private_subnet1.id
 }

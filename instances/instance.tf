@@ -1,5 +1,6 @@
 variable "vpc_id" {}
-variable "subnet_id" {}
+variable "public_subnet_id" {}
+variable "private_subnet1_id" {}
 
 resource "aws_security_group" "web_sg" {
   name        = "web_sg"
@@ -30,7 +31,7 @@ resource "aws_instance" "web_server" {
   ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
   instance_type   = "t2.micro"
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  subnet_id       = var.subnet_id
+  subnet_id       = var.public_subnet_id
   associate_public_ip_address = true 
 
   tags = {
@@ -68,7 +69,7 @@ resource "aws_instance" "private_server" {
   ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
   instance_type   = "t2.micro"
   vpc_security_group_ids = [aws_security_group.private_web_sg.id]
-  subnet_id       = var.subnet_id
+  subnet_id       = var.private_subnet1_id
   associate_public_ip_address = true 
 
   tags = {
@@ -77,17 +78,16 @@ resource "aws_instance" "private_server" {
   }
 }
 
-/*
 resource "aws_security_group" "rds_sg" {
   name        = "rds_sg"
-  description = "Security group para RDS, permitindo acesso da instancia EC2"
-  vpc_id      = "vpc-05c5b4cc3ecc3b273"
-
+  description = "Security group para RDS, permitindo acesso da instancia EC2 privada"
+  vpc_id      = var.vpc_id
+  
   ingress {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.web_sg.id]  
+    security_groups = [aws_security_group.private_web_sg.id]  
   }
 
   egress {
@@ -105,7 +105,7 @@ resource "aws_security_group" "rds_sg" {
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "rds_subnet_group"
-  subnet_ids = ["subnet-09348fbdb9933d2a5", "subnet-01bbc5886d21d6a18"] 
+  subnet_ids = [private_subnet1_id]
 
   tags = {
     Aluno = "jrlb_jvavm"
@@ -123,7 +123,7 @@ resource "aws_db_instance" "jrlb_jvavm_RDS" {
   allocated_storage    = 20
   port                 = 3306
   db_subnet_group_name = aws_db_subnet_group.rds_subnet_group.name
-  vpc_security_group_ids = ["sg-097e10349089806e7"]
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot  = true
   publicly_accessible  = false
   backup_retention_period = 7
@@ -133,4 +133,3 @@ resource "aws_db_instance" "jrlb_jvavm_RDS" {
     Periodo = "8"
   }
 }
-*/
