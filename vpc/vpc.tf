@@ -38,7 +38,7 @@ resource "aws_subnet" "private_subnet2" {
   }
 }
 
-/*
+
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.vpc_jrlb_jvavm.id
 
@@ -62,11 +62,16 @@ resource "aws_route_table" "route_table" {
   }
 }
 
+
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public_subnet.id
-  route_table_id = "rtb-051032fe8e928a9ad"
+  route_table_id = aws_route_table.route_table.id
 }
 
 output "subnetid" {
   value = aws_subnet.public_subnet.id
-}*/
+}
+
+output "vpc_id" {
+  value = aws_vpc.vpc_jrlb_jvavm.id
+}
