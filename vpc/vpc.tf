@@ -62,7 +62,7 @@ resource "aws_route_table" "route_table" {
   }
 }
 
-
+/*
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public_subnet.id
   route_table_id = aws_route_table.route_table.id
@@ -76,6 +76,6 @@ output "public_subnetid" {
   value = aws_subnet.public_subnet.id
 }
 
-output "private_subnet1_id{
-  value - aws_subnet.private_subnet1.id
-}
+output "private_subnet1_id" {
+  value = aws_subnet.private_subnet1.id
+}*/

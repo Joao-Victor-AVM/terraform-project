@@ -1,3 +1,4 @@
+/*
 variable "vpc_id" {}
 variable "public_subnet_id" {}
 variable "private_subnet1_id" {}
@@ -27,19 +28,6 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-resource "aws_instance" "web_server" {
-  ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
-  instance_type   = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
-  subnet_id       = var.public_subnet_id
-  associate_public_ip_address = true 
-
-  tags = {
-    Aluno = "jrlb_jvavm"
-    Periodo = "8"
-  }
-}
-
 resource "aws_security_group" "private_web_sg" {
   name        = "web_sg"
   description = "Security group para servidor web"
@@ -49,7 +37,7 @@ resource "aws_security_group" "private_web_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [aws_security_group.web_sg.id]
+    security_groups = [aws_security_group.web_sg.id]
   }
   
   egress {
@@ -58,19 +46,6 @@ resource "aws_security_group" "private_web_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = {
-    Aluno = "jrlb_jvavm"
-    Periodo = "8"
-  }
-}
-
-resource "aws_instance" "private_server" {
-  ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
-  instance_type   = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.private_web_sg.id]
-  subnet_id       = var.private_subnet1_id
-  associate_public_ip_address = true 
 
   tags = {
     Aluno = "jrlb_jvavm"
@@ -96,6 +71,65 @@ resource "aws_security_group" "rds_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Aluno = "jrlb_jvavm"
+    Periodo = "8"
+  }
+}
+
+resource "aws_security_group" "sg_alb" {
+  name        = "jrlb_jvavm_alb"
+  vpc_id      = var.vpc_id
+  description = "Security Group for ALB"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "web_server" {
+  ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
+  instance_type   = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  subnet_id       = var.public_subnet_id
+  associate_public_ip_address = true 
+
+  tags = {
+    Aluno = "jrlb_jvavm"
+    Periodo = "8"
+  }
+}
+
+resource "aws_instance" "private_server" {
+  ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
+  instance_type   = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.private_web_sg.id]
+  subnet_id       = var.private_subnet1_id
+  associate_public_ip_address = true 
+
+  tags = {
+    Aluno = "jrlb_jvavm"
+    Periodo = "8"
+  }
+}
+
+resource "aws_instance" "private_server2" {
+  ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
+  instance_type   = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.private_web_sg.id]
+  subnet_id       = var.private_subnet1_id
+  associate_public_ip_address = true 
 
   tags = {
     Aluno = "jrlb_jvavm"
@@ -132,23 +166,4 @@ resource "aws_db_instance" "jrlb_jvavm_RDS" {
     Aluno = "jrlb_jvavm"
     Periodo = "8"
   }
-}
-
-resource "aws_security_group" "sg_alb" {
-  name        = "sg-alb"
-  description = "Security Group for ALB"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
+}*/
