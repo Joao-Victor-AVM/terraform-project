@@ -15,7 +15,7 @@ resource "aws_launch_configuration" "jrlb_jvavm_wevserver_lauch_config"{
   image_id = ami-0d0f28110d16ee7d6
   instance_type = "t3.micro"
   key_name = "Codepoint"
-  security_groups = [var.sg_alb_name]
+  security_groups = [var.web_sg_id]
 
   user_data = #!/bin/bash
               yum update -y

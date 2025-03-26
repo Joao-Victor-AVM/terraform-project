@@ -5,7 +5,7 @@ variable "rds_sg_id" {}
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "rds_subnet_group"
-  subnet_ids = [var.private_subnet1_id]
+  subnet_ids = [var.private_subnet1_id, var.private_subnet2]
 
   tags = {
     Aluno = "jrlb_jvavm"
