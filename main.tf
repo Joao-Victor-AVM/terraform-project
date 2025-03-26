@@ -12,4 +12,5 @@ module "instance"{
   vpc_id = module.vpc.vpc_id
   public_subnet_id = module.vpc.public_subnetid
   private_subnet1_id = module.vpc.private_subnet1_id
+  private_subnet2_id = module.vpc.private_subnet2_id
 }*/
