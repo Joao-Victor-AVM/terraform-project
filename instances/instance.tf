@@ -104,7 +104,14 @@ resource "aws_instance" "web_server" {
   instance_type   = "t2.micro"
   vpc_security_group_ids = [aws_security_group.web_sg.id]
   subnet_id       = var.public_subnet_id
-  associate_public_ip_address = true 
+  associate_public_ip_address = true
+
+  user data = "#!/bin/bash
+              yum update -y
+              yum install -y httpd.x86_64
+              systemctl start httpd.service
+              systemctl enable httpd.service
+              echo “Hello World from $(hostname -f)” > /var/www/html/index.html"
 
   tags = {
     Aluno = "jrlb_jvavm"
@@ -136,6 +143,47 @@ resource "aws_instance" "private_server2" {
     Aluno = "jrlb_jvavm"
     Periodo = "8"
   }
+}
+
+resource "aws_lb_target_group" "jrlb_jvavm_lb"{
+  name = "asdads"
+  depends_on = [aws_vpc]
+  port = 80
+  protocol = "HTTP"
+  vpc_id = aws_vpc.main.id
+  health_check{
+    interval = 70
+    path = "/index.html"
+    port = 80
+    health_threshold = 2
+    unhealthy_threshold = 2
+    timeout = 60
+    protocol = "HTTP"
+    mathcer = "200, 202"
+  }
+
+  tags = {
+    Aluno = "jrlb_jvavm"
+    Periodo = "8"
+  }
+}
+
+resource "aws_autoscalling_group" "jrlb_jvavm_asg"{
+ name = "jrlb_jvavm_asg"
+ desired_capacity = 2
+ max_size = 4
+ min_size = 1
+ force_delete = true
+ depends_on = [aws_alb.alb-tf]
+ target_group_arns = [{aws_alb_target_group.tg-tf.arn}]
+ health_check_type = "EC2"
+ launch_configuration = aws_lauch_configuration.web_server_launch_config.name
+ vpc_zone_identifier = [{aws_subnet.prv_sub1.id}, {aws_subnet.prv_sub1.id}]
+ 
+ tags = {
+    Aluno = "jrlb_jvavm"
+    Periodo = "8"
+  } 
 }
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
