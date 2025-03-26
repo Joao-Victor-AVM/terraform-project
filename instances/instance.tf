@@ -1,6 +1,7 @@
 /*
 variable "vpc_id" {}
-variable "public_subnet_id" {}
+variable "public_subnet1_id" {}
+variable "public_subnet2_id" {}
 variable "private_subnet1_id" {}
 variable "private_subnet2_id" {}
 
@@ -79,8 +80,8 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-resource "aws_security_group" "sg_alb" {
-  name        = "jrlb_jvavm_alb"
+resource "aws_security_group" "jrlb_jvavm_sg_alb" {
+  name        = "jrlb_jvavm_sg_alb"
   vpc_id      = var.vpc_id
   description = "Security Group for ALB"
 
@@ -99,68 +100,26 @@ resource "aws_security_group" "sg_alb" {
   }
 }
 
-resource "aws_instance" "web_server" {
-  ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
-  instance_type   = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
-  subnet_id       = var.public_subnet_id
-  associate_public_ip_address = true
+resource "aws_launch_configuration" "jrlb_jvavm_wevserver_lauch_config"{
+  name_prefix = "jrlb_jvavm_wevserver_lauch_config"
+  image_id = ami-0d0f28110d16ee7d6
+  instance_type = "t3.micro"
+  key_name = "Codepoint"
+  security_groups = [aws_security_group.jrlb_jvavm_sg_alb.name]
 
-  user data = "#!/bin/bash
+  user_data = #!/bin/bash
               yum update -y
               yum install -y httpd.x86_64
               systemctl start httpd.service
               systemctl enable httpd.service
-              echo “Hello World from $(hostname -f)” > /var/www/html/index.html"
-
-  tags = {
-    Aluno = "jrlb_jvavm"
-    Periodo = "8"
-  }
+              echo “Hello World from $(hostname -f)” > /var/www/html/index.html
 }
 
-resource "aws_instance" "private_server" {
-  ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
-  instance_type   = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.private_web_sg.id]
-  subnet_id       = var.private_subnet1_id
-  associate_public_ip_address = true 
-
-  tags = {
-    Aluno = "jrlb_jvavm"
-    Periodo = "8"
-  }
-}
-
-resource "aws_instance" "private_server2" {
-  ami             = "ami-08b5b3a93ed654d19"  # Amazon Linux 2
-  instance_type   = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.private_web_sg.id]
-  subnet_id       = var.private_subnet2_id
-  associate_public_ip_address = true 
-
-  tags = {
-    Aluno = "jrlb_jvavm"
-    Periodo = "8"
-  }
-}
-
-resource "aws_lb_target_group" "jrlb_jvavm_lb"{
-  name = "asdads"
-  depends_on = [aws_vpc]
+resource "aws_lb_target_group" "jrlb_jvavm_target_group"{
+  name = "jrlb_jvavm_target_group"
   port = 80
   protocol = "HTTP"
-  vpc_id = aws_vpc.main.id
-  health_check{
-    interval = 70
-    path = "/index.html"
-    port = 80
-    health_threshold = 2
-    unhealthy_threshold = 2
-    timeout = 60
-    protocol = "HTTP"
-    mathcer = "200, 202"
-  }
+  vpc_id = var.vpc_id
 
   tags = {
     Aluno = "jrlb_jvavm"
@@ -173,12 +132,10 @@ resource "aws_autoscalling_group" "jrlb_jvavm_asg"{
  desired_capacity = 2
  max_size = 4
  min_size = 1
- force_delete = true
- depends_on = [aws_alb.alb-tf]
- target_group_arns = [{aws_alb_target_group.tg-tf.arn}]
+ target_group_arns = [{aws_lb_target_group.jrlb_jvavm_target_group}]
  health_check_type = "EC2"
  launch_configuration = aws_lauch_configuration.web_server_launch_config.name
- vpc_zone_identifier = [{aws_subnet.prv_sub1.id}, {aws_subnet.prv_sub1.id}]
+ vpc_zone_identifier = [{var.public_subnet1_id}, {var.public_subnet1_id}]
  
  tags = {
     Aluno = "jrlb_jvavm"
@@ -186,9 +143,33 @@ resource "aws_autoscalling_group" "jrlb_jvavm_asg"{
   } 
 }
 
+resource "aws_lb" "jrlb_jvavm_lb" {
+  name = "jrlb_jvavm_lb"
+  internal = false
+  load_balancer_type = "application"
+  security_groups = [aws_security_group.jrlb_jvavm_sg_alb.id]
+  subnets = [var.public_subnet1_id, var.public_subnet2_id]
+
+  tags = {
+    Aluno = "jrlb_jvavm"
+    Periodo = "8"
+  } 
+}
+
+resource "aws_lb_listener" "jrlb_jvavm_front_end"{
+  load_balancer_arn = aws_lb.jrlb_jvavm_lb.arn
+  port = "80"
+  protocol = "HTTP"
+
+  default_action{
+    type = "forward"
+    target_group_arns = aws_lb_target_group.jrlb_jvavm_target_group.arn
+  }
+}
+
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "rds_subnet_group"
-  subnet_ids = [private_subnet1_id]
+  subnet_ids = [var.private_subnet1_id]
 
   tags = {
     Aluno = "jrlb_jvavm"
@@ -205,6 +186,7 @@ resource "aws_db_instance" "jrlb_jvavm_RDS" {
   password             = "password123"
   allocated_storage    = 20
   port                 = 3306
+  publicly_accessible = no
   db_subnet_group_name = aws_db_subnet_group.rds_subnet_group.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot  = true
