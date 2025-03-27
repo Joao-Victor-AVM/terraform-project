@@ -1,9 +1,5 @@
-/*
+
 variable "vpc_id" {}
-variable "public_subnet1_id" {}
-variable "public_subnet2_id" {}
-variable "private_subnet1_id" {}
-variable "private_subnet2_id" {}
 
 resource "aws_security_group" "web_sg" {
   name        = "web_sg"
@@ -29,6 +25,7 @@ resource "aws_security_group" "web_sg" {
     Periodo = "8"
   }
 }
+
 
 resource "aws_security_group" "private_web_sg" {
   name        = "private_web_sg"
@@ -98,6 +95,11 @@ resource "aws_security_group" "sg_alb" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Aluno = "jrlb_jvavm"
+    Periodo = "8"
+  }
 }
 
 output "web_sg"{
@@ -118,4 +120,4 @@ output "sg_alb_name"{
 
 output "sg_alb_id"{
   value = aws_security_group.sg_alb.id
-}*/
+}

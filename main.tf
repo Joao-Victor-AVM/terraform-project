@@ -1,8 +1,7 @@
 provider "aws" {
   region = "us-east-1"
-  
 }
-/*
+
 module "vpc"{
   source = "./vpc"
   
@@ -32,4 +31,3 @@ module "rds"{
   private_subnet2_id = module.vpc.private_subnet2_id
   rds_sg_id = module.sg.rds_sg
 }
-*/

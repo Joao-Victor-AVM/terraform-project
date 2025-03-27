@@ -1,11 +1,11 @@
-/*
 variable "private_subnet1_id" {}
 variable "private_subnet2_id" {}
 variable "rds_sg_id" {}
 
+
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "rds_subnet_group"
-  subnet_ids = [var.private_subnet1_id, var.private_subnet2]
+  subnet_ids = [var.private_subnet1_id, var.private_subnet2_id]
 
   tags = {
     Aluno = "jrlb_jvavm"
@@ -22,7 +22,6 @@ resource "aws_db_instance" "jrlb_jvavm_RDS" {
   password             = "password123"
   allocated_storage    = 20
   port                 = 3306
-  publicly_accessible = no
   db_subnet_group_name = aws_db_subnet_group.rds_subnet_group.name
   vpc_security_group_ids = [var.rds_sg_id]
   skip_final_snapshot  = true
@@ -33,4 +32,4 @@ resource "aws_db_instance" "jrlb_jvavm_RDS" {
     Aluno = "jrlb_jvavm"
     Periodo = "8"
   }
-}*/
+}
