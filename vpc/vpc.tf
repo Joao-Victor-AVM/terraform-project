@@ -13,6 +13,7 @@ resource "aws_subnet" "public_subnet1" {
   vpc_id     = aws_vpc.vpc_jrlb_jvavm.id
   cidr_block = "172.31.1.0/24"
   availability_zone = "us-east-1d"
+  map_public_ip_on_launch = true
 
   tags = {
     Aluno = "jrlb_jvavm"
@@ -24,6 +25,7 @@ resource "aws_subnet" "public_subnet2" {
   vpc_id     = aws_vpc.vpc_jrlb_jvavm.id
   cidr_block = "172.31.2.0/24"
   availability_zone = "us-east-1c"
+  map_public_ip_on_launch = true
 
   tags = {
     Aluno = "jrlb_jvavm"

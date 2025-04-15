@@ -21,13 +21,13 @@ resource "aws_launch_template" "jrlb_jvavm_wevserver_lauch_config"{
   }
 
   user_data = base64encode(<<-EOF
-            #!/bin/bash
-            yum update -y
-            yum install -y httpd.x86_64
-            systemctl start httpd.service
-            systemctl enable httpd.service
-            echo “Hello World from $(hostname -f)” > /var/www/html/index.html
-            EOF
+    #!/bin/bash
+    yum update -y
+    yum install -y httpd -y
+    systemctl start httpd
+    systemctl enable httpd
+    echo "Hello World from $(hostname -f)" > /var/www/html/index.html
+  EOF
   )
 
   tag_specifications {
@@ -52,10 +52,22 @@ resource "aws_launch_template" "jrlb_jvavm_wevserver_lauch_config"{
 }
 
 resource "aws_lb_target_group" "jrlb_jvavm_target_group"{
-  name = "jrlb-jvavm-target-group"
-  port = 80
+  name     = "jrlb-jvavm-target-group"
+  port     = 80
   protocol = "HTTP"
-  vpc_id = var.vpc_id
+  vpc_id   = var.vpc_id
+  target_type = "instance"
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    port                = "80"
+    interval            = 30
+    timeout             = 10
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+    matcher             = "200"
+  }
 
   tags = {
     Aluno = "jrlb_jvavm"
@@ -68,9 +80,10 @@ resource "aws_autoscaling_group" "jrlb_jvavm_asg"{
  desired_capacity = 2
  max_size = 4
  min_size = 1
- health_check_type = "EC2"
+ health_check_type = "ELB"
  vpc_zone_identifier = [var.public_subnet1_id, var.public_subnet2_id]
-
+ target_group_arns = [aws_lb_target_group.jrlb_jvavm_target_group.arn]
+ 
  launch_template {
     id      = aws_launch_template.jrlb_jvavm_wevserver_lauch_config.id
     version = "$Latest"
