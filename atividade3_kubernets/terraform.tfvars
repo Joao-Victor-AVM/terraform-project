@@ -1,0 +1,1 @@
+node_role_arn = "arn:aws:iam::325583868777:role/my-eks-node-role"
