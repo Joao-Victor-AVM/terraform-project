@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todolist-jrlb-jvavm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: todolist-jrlb-jvavm-backend
+  template:
+    metadata:
+      labels:
+        run: todolist-jrlb-jvavm-backend
+    spec:
+      containers:
+      - name: todolist-jrlb-jvavm
+        image: jvavm/getting-started:latest
+        ports:
+        - containerPort: 3000
+          protocol: TCP
